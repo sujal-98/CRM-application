@@ -61,9 +61,29 @@ export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      await api.get('/api/auth/logout');
+      const response = await api.get('/api/auth/logout');
+      
+      if (response.data.status === 'success') {
+        // Clear all local storage
+        localStorage.clear();
+        
+        // Clear all axios headers
+        delete axios.defaults.headers.common['Authorization'];
+        
+        // Clear any other stored data
+        sessionStorage.clear();
+        
+        return true;
+      } else {
+        throw new Error(response.data.message || 'Logout failed');
+      }
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Logout failed');
+      console.error('Logout error:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to logout'
+      );
     }
   }
 );

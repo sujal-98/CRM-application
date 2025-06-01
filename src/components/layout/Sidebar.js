@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
 import {
   Box,
   Drawer,
@@ -12,6 +14,7 @@ import {
   useTheme,
   useMediaQuery,
   Collapse,
+  Button,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -24,6 +27,7 @@ import {
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
   Rule as RuleIcon,
+  LogoutOutlined as LogoutIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -60,6 +64,7 @@ const menuItems = [
 const Sidebar = ({ open, onClose }) => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [openGroups, setOpenGroups] = React.useState({
@@ -79,6 +84,15 @@ const Sidebar = ({ open, onClose }) => {
       return location.pathname === '/';
     }
     return location.pathname.startsWith(path);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const renderMenuItem = (item, level = 0) => {
@@ -151,6 +165,25 @@ const Sidebar = ({ open, onClose }) => {
         {menuItems.map((item) => renderMenuItem(item))}
       </List>
       <Box sx={{ p: 2 }}>
+        <Button
+          fullWidth
+          variant="outlined"
+          color="error"
+          startIcon={<LogoutIcon />}
+          onClick={handleLogout}
+          sx={{
+            mb: 2,
+            borderRadius: 2,
+            py: 1,
+            borderWidth: 2,
+            '&:hover': {
+              borderWidth: 2,
+              backgroundColor: theme.palette.error.light,
+            },
+          }}
+        >
+          Logout
+        </Button>
         <Box
           sx={{
             p: 2,
@@ -159,10 +192,10 @@ const Sidebar = ({ open, onClose }) => {
             color: theme.palette.primary.main,
           }}
         >
-          <Box sx={{ typography: 'subtitle2', fontWeight: 'bold', mb: 1 , color:'white'}}>
+          <Box sx={{ typography: 'subtitle2', fontWeight: 'bold', mb: 1, color: 'white' }}>
             Need Help?
           </Box>
-          <Box sx={{ typography: 'body2' , color: 'white'}}>
+          <Box sx={{ typography: 'body2', color: 'white' }}>
             Check our documentation or contact support
           </Box>
         </Box>

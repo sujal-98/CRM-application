@@ -1,39 +1,44 @@
 # XenoCRM Frontend
 
-A modern React-based CRM system with customer segmentation and campaign management capabilities.
+A modern React-based CRM application with customer segmentation, campaign management, and analytics capabilities.
 
 ## Features
 
-- **Dashboard**
-  - Real-time statistics for customers and campaigns
-  - Performance metrics for last 10 campaigns
-  - Recent segments and campaign overview
-  - Visual analytics and charts
+### Customer Segmentation
+- Dynamic segment builder with multiple conditions
+- Real-time segment preview
+- Advanced filtering options:
+  - Total spend
+  - Number of visits
+  - Total orders
+  - Average order value
+  - Days since last order
+- Logical operators (AND/OR) support
+- Instant audience size calculation
+- Detailed segment analytics
 
-- **Customer Management**
-  - Customer profile viewing and management
-  - Customer activity tracking
-  - Order history and spending analysis
+### Campaign Management
+- Create campaigns from segments
+- Campaign performance tracking
+- Message delivery status monitoring
+- Success/failure rate analytics
+- Batch processing support
 
-- **Segmentation**
-  - Dynamic segment builder with drag-and-drop interface
-  - Multiple condition support (Total Spend, Days Since Last Order, etc.)
-  - Real-time segment preview
-  - Save and manage segments
-
-- **Campaign Management**
-  - Campaign history view
-  - Campaign performance metrics
-  - Success/Failure rate tracking
-  - Message delivery statistics
+### Dashboard
+- Real-time analytics
+- Customer metrics
+- Campaign performance
+- Segment distribution
+- Recent activity tracking
 
 ## Tech Stack
 
-- React.js
-- Material-UI (MUI)
-- React Router
-- Axios for API calls
-- Chart.js for analytics
+- **React 18+**
+- **Material-UI (MUI) v5**
+- **Redux Toolkit** for state management
+- **Axios** for API communication
+- **React Router v6** for navigation
+- **Notistack** for notifications
 
 ## Setup
 

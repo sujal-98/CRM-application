@@ -171,7 +171,7 @@ const FlowSegmentBuilder = ({ conditions, setConditions }) => {
                     <Paper
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      elevation={snapshot.isDragging ? 6 : 2}
+                      elevation={snapshot.isDragging ? 6 : 7}
                       sx={{
                         p: 3,
                         mb: 3,
