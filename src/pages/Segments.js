@@ -31,6 +31,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { selectUser } from '../store/slices/authSlice';
 import { useSnackbar } from 'notistack';
+import MessageSuggestions from '../components/campaigns/MessageSuggestions';
 
 const Segments = () => {
   const theme = useTheme();
@@ -46,6 +47,7 @@ const Segments = () => {
   const [campaignMessage, setCampaignMessage] = useState('');
   const [campaignLoading, setCampaignLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const [segmentPurpose, setSegmentPurpose] = useState('');
 
   useEffect(() => {
     const fetchSegments = async () => {
@@ -102,6 +104,7 @@ const Segments = () => {
 
   const handleStartCampaign = (segment) => {
     setSelectedSegment(segment);
+    setSegmentPurpose(`Engage customers in segment: ${segment.name}`);
     setStartCampaignDialog(true);
   };
 
@@ -121,6 +124,7 @@ const Segments = () => {
         enqueueSnackbar('Campaign created and started successfully!', { variant: 'success' });
         setStartCampaignDialog(false);
         setCampaignMessage('');
+        setSegmentPurpose('');
       }
     } catch (error) {
       console.error('Campaign error:', error);
@@ -262,27 +266,51 @@ const Segments = () => {
       <Dialog
         open={startCampaignDialog}
         onClose={() => setStartCampaignDialog(false)}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
       >
         <DialogTitle>Start Campaign for "{selectedSegment?.name}"</DialogTitle>
         <DialogContent>
-          <Typography gutterBottom>
-            Audience Size: {selectedSegment?.customerIds.length || 0}
-          </Typography>
-          <TextField
-            label="Message Template"
-            fullWidth
-            multiline
-            minRows={3}
-            value={campaignMessage}
-            onChange={e => setCampaignMessage(e.target.value)}
-            placeholder="e.g. Hello [[name]], check out our new offer!"
-            sx={{ mt: 2 }}
-          />
+          <Box sx={{ mb: 2 }}>
+            <Typography gutterBottom>
+              Audience Size: {selectedSegment?.customerIds.length || 0}
+            </Typography>
+            
+            <TextField
+              label="Campaign Purpose"
+              fullWidth
+              value={segmentPurpose}
+              onChange={(e) => setSegmentPurpose(e.target.value)}
+              sx={{ mb: 2, mt: 1 }}
+              placeholder="e.g., Promote new products, Re-engage customers"
+            />
+
+            <MessageSuggestions
+              audience={selectedSegment?.name || ''}
+              purpose={segmentPurpose}
+              onSelectMessage={(message) => setCampaignMessage(message)}
+            />
+
+            <TextField
+              label="Message Template"
+              fullWidth
+              multiline
+              minRows={3}
+              value={campaignMessage}
+              onChange={e => setCampaignMessage(e.target.value)}
+              placeholder="Use suggested message or write your own. Use {customerName} for personalization."
+              sx={{ mt: 2 }}
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setStartCampaignDialog(false)}>Cancel</Button>
+          <Button onClick={() => {
+            setStartCampaignDialog(false);
+            setCampaignMessage('');
+            setSegmentPurpose('');
+          }}>
+            Cancel
+          </Button>
           <Button
             onClick={handleCampaignSubmit}
             disabled={campaignLoading || !campaignMessage}

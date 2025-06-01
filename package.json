@@ -1,6 +1,6 @@
 {
-  "name": "crm",
-  "version": "0.1.0",
+  "name": "xenocrm-frontend",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -52,5 +52,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }

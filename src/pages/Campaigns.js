@@ -12,16 +12,18 @@ import {
   Chip,
   CircularProgress,
   Stack,
-  Tooltip
+  Tooltip,
+  TextField
 } from '@mui/material';
 import {
   CheckCircle as SuccessIcon,
   Cancel as FailedIcon,
   Group as AudienceIcon
 } from '@mui/icons-material';
-import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { selectUser } from '../store/slices/authSlice';
+import api from '../services/api';
+import MessageSuggestions from '../components/campaigns/MessageSuggestions';
 
 const Campaigns = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -34,7 +36,7 @@ const Campaigns = () => {
 
   const fetchCampaigns = async () => {
     try {
-      const response = await axios.get(`http://localhost:4000/api/campaigns?email=${user.email}`);
+      const response = await api.get(`/api/campaigns?email=${user.email}`);
       if (response.data.status === 'success') {
         setCampaigns(response.data.data);
       }
@@ -76,6 +78,20 @@ const Campaigns = () => {
     const successRate = ((sent / total) * 100).toFixed(1);
 
     return { sent, failed, total, successRate };
+  };
+
+  const [formData, setFormData] = useState({
+    name: '',
+    audience: '',
+    purpose: '',
+    message: ''
+  });
+
+  const handleMessageSelect = (message) => {
+    setFormData(prev => ({
+      ...prev,
+      message
+    }));
   };
 
   return (
@@ -193,6 +209,8 @@ const Campaigns = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+   
     </Box>
   );
 };

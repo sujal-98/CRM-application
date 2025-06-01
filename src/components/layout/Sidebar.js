@@ -155,7 +155,7 @@ const Sidebar = ({ open, onClose }) => {
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <img src="/logo.png" alt="XenoCRM" style={{ height: 32 }} />
+        <img src="/bird_2.jpg" alt="XenoCRM" style={{ height: 32 }} />
         <Box sx={{ typography: 'h6', fontWeight: 'bold', color: theme.palette.primary.main }}>
           XenoCRM
         </Box>

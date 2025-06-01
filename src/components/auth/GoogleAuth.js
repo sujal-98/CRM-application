@@ -2,9 +2,7 @@ import React from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { Box, Typography, Paper, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+import config from '../../config';
 
 const GoogleAuth = () => {
   const theme = useTheme();
@@ -13,7 +11,7 @@ const GoogleAuth = () => {
   const handleSuccess = async (credentialResponse) => {
     try {
       // Redirect to backend Google OAuth flow
-      window.location.href = `${API_URL}/api/auth/google`;
+      window.location.href = `${config.apiUrl}/api/auth/google`;
     } catch (error) {
       console.error('Authentication error:', error);
       // TODO: Show error message to user

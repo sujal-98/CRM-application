@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Box,
@@ -33,6 +33,7 @@ import {
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import { selectUser } from '../../store/slices/authSlice';
+import api from '../../services/api';
 
 export const CONDITIONS = [
   {
@@ -191,7 +192,7 @@ const FlowSegmentBuilder = () => {
             comparator: conditions[i].comparator,
             value: Number(conditions[i].value)
           });
-        } else {
+      } else {
           currentRule = {
             type: operator,
             conditions: [
@@ -224,9 +225,9 @@ const FlowSegmentBuilder = () => {
       console.log('Sending preview request with rules:', convertedRules);
 
       setLoading(true);
-      const response = await axios.post('http://localhost:4000/api/segmentation/count', {
+      const response = await api.post('/api/segmentation/count', {
         rules: convertedRules.rules,
-        options: {}
+        options: {} 
       });
 
       console.log('Preview response:', response.data);
@@ -249,7 +250,7 @@ const FlowSegmentBuilder = () => {
           enqueueSnackbar('No customers match these criteria', { variant: 'info' });
           setAudienceCount(0);
           setAudienceDetails({
-            averageSpend: 0,
+        averageSpend: 0,
             averageOrders: 0,
             totalSpend: 0
           });
@@ -275,11 +276,7 @@ const FlowSegmentBuilder = () => {
         throw new Error(response.data.message || 'Failed to preview segment');
       }
     } catch (error) {
-      console.error('Preview error:', error);
-      setHasPreviewedSegment(false);
-      setAudienceCount(0);
-      setAudience([]);
-      setAudienceDetails(null);
+      console.error('Error previewing segment:', error);
       enqueueSnackbar(error.message || 'Failed to preview segment', { variant: 'error' });
     } finally {
       setLoading(false);
@@ -381,7 +378,7 @@ const FlowSegmentBuilder = () => {
 
   return (
     <>
-      <Box sx={{ 
+    <Box sx={{ 
         p: 4,
         backgroundColor: alpha(theme.palette.background.default, 0.7),
         borderRadius: theme.shape.borderRadius * 2,
@@ -396,7 +393,7 @@ const FlowSegmentBuilder = () => {
             backdropFilter: 'blur(10px)',
           }}
         >
-          {/* Header */}
+      {/* Header */}
           <Box sx={{ mb: 4, textAlign: 'center' }}>
             <Typography 
               variant="h4" 
@@ -407,8 +404,8 @@ const FlowSegmentBuilder = () => {
                 mb: 3
               }}
             >
-              Segment Builder
-            </Typography>
+                Segment Builder
+              </Typography>
             <TextField
               fullWidth
               label="Segment Name"
@@ -424,7 +421,7 @@ const FlowSegmentBuilder = () => {
             />
           </Box>
 
-          {/* Condition String Preview */}
+      {/* Condition String Preview */}
           <Paper 
             sx={{ 
               p: 3, 
@@ -442,11 +439,11 @@ const FlowSegmentBuilder = () => {
                 fontWeight: 600 
               }}
             >
-              Segment Logic Preview
-            </Typography>
+          Segment Logic Preview
+        </Typography>
             <Typography variant="body1" sx={{ color: theme.palette.text.secondary }}>
               {generateConditionString() || 'Add conditions to see the segment logic preview.'}
-            </Typography>
+        </Typography>
           </Paper>
 
           {/* Existing Conditions */}
@@ -493,7 +490,7 @@ const FlowSegmentBuilder = () => {
                     )}
                     <Grid item xs={12} sm={index > 0 ? 8 : 10}>
                       <Box sx={{ 
-                        display: 'flex', 
+            display: 'flex',
                         alignItems: 'center',
                         gap: 1,
                         p: 1,
@@ -522,7 +519,7 @@ const FlowSegmentBuilder = () => {
                               }}
                             >
                               {CONDITIONS.find(c => c.value === condition.condition)?.unit}
-                            </Typography>
+            </Typography>
                           )}
                         </Typography>
                       </Box>
@@ -548,10 +545,10 @@ const FlowSegmentBuilder = () => {
 
           {/* Add New Condition */}
           <Paper 
-            sx={{ 
+                  sx={{
               p: 4, 
               mb: 4,
-              borderRadius: 2,
+                    borderRadius: 2,
               border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               bgcolor: alpha(theme.palette.background.paper, 0.8),
             }}
@@ -576,9 +573,9 @@ const FlowSegmentBuilder = () => {
                     onChange={(e) => setNewCondition({ ...newCondition, condition: e.target.value })}
                     label="Condition"
                     sx={{ borderRadius: 2 }}
-                  >
-                    {CONDITIONS.map((condition) => (
-                      <MenuItem key={condition.value} value={condition.value}>
+                >
+                  {CONDITIONS.map((condition) => (
+                    <MenuItem key={condition.value} value={condition.value}>
                         <Box>
                           <Typography variant="body1">
                             {condition.label}
@@ -586,50 +583,50 @@ const FlowSegmentBuilder = () => {
                           <Typography variant="caption" color="text.secondary">
                             {condition.description}
                           </Typography>
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <FormControl fullWidth>
-                  <InputLabel>Operator</InputLabel>
-                  <Select
-                    value={newCondition.comparator}
+              <FormControl fullWidth>
+                <InputLabel>Operator</InputLabel>
+                <Select
+                  value={newCondition.comparator}
                     onChange={(e) => setNewCondition({ ...newCondition, comparator: e.target.value })}
-                    label="Operator"
+                  label="Operator"
                     sx={{ borderRadius: 2 }}
-                  >
-                    {COMPARATORS.map((comp) => (
-                      <MenuItem key={comp.value} value={comp.value}>
+                >
+                  {COMPARATORS.map((comp) => (
+                    <MenuItem key={comp.value} value={comp.value}>
                         <Typography sx={{ fontWeight: 600 }}>
-                          {comp.label}
-                        </Typography>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                        {comp.label}
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  label="Value"
-                  type="number"
-                  value={newCondition.value}
+              <TextField
+                fullWidth
+                label="Value"
+                type="number"
+                value={newCondition.value}
                   onChange={(e) => setNewCondition({ ...newCondition, value: e.target.value })}
-                  sx={{ 
+                sx={{
                     borderRadius: 2,
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
                     }
                   }}
                 />
               </Grid>
             </Grid>
             <Button
-              variant="contained"
-              startIcon={<AddIcon />}
+                  variant="contained"
+                  startIcon={<AddIcon />}
               onClick={handleAddCondition}
               disabled={!newCondition.condition || !newCondition.comparator || !newCondition.value}
               sx={{ 
@@ -642,8 +639,8 @@ const FlowSegmentBuilder = () => {
                   background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
                 }
               }}
-            >
-              Add Condition
+                >
+                  Add Condition
             </Button>
           </Paper>
 
@@ -655,9 +652,9 @@ const FlowSegmentBuilder = () => {
             sx={{ mt: 4 }}
           >
             <Button
-              variant="outlined"
+                    variant="outlined"
               startIcon={<PreviewIcon />}
-              onClick={handlePreview}
+                    onClick={handlePreview}
               disabled={conditions.length === 0}
               sx={{ 
                 borderRadius: 2,
@@ -665,13 +662,13 @@ const FlowSegmentBuilder = () => {
                 py: 1,
                 borderWidth: 2,
               }}
-            >
-              Preview
+                  >
+                    Preview
             </Button>
             <Button
-              variant="contained"
-              startIcon={<SaveIcon />}
-              onClick={handleSave}
+                    variant="contained"
+                    startIcon={<SaveIcon />}
+                    onClick={handleSave}
               disabled={conditions.length === 0 || !segmentName.trim()}
               sx={{ 
                 borderRadius: 2,
@@ -682,16 +679,16 @@ const FlowSegmentBuilder = () => {
                   background: `linear-gradient(45deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
                 }
               }}
-            >
-              Save Segment
+                  >
+                    Save Segment
             </Button>
-          </Stack>
+                </Stack>
         </Paper>
 
         {/* Preview Modal */}
         <Dialog 
-          open={previewModalOpen} 
-          onClose={() => setPreviewModalOpen(false)} 
+          open={previewModalOpen}
+          onClose={() => setPreviewModalOpen(false)}
           maxWidth="md" 
           fullWidth
           PaperProps={{
@@ -861,7 +858,7 @@ const FlowSegmentBuilder = () => {
                     {generateConditionString()}
                   </Typography>
                 </Paper>
-              </Box>
+    </Box>
             </Box>
           </DialogContent>
           <DialogActions sx={{ p: 3, borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>

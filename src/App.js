@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemeProvider, CssBaseline, CircularProgress, Box } from '@mui/material';
@@ -18,6 +18,20 @@ import Profile from './pages/Profile';
 import AuthCallback from './pages/AuthCallback';
 import ProtectedRoute from './components/ProtectedRoute';
 import axios from 'axios';
+import ErrorBoundary from './components/ErrorBoundary';
+import { Sidebar } from './components/layout/Sidebar';
+import { FlowSegmentBuilder } from './components/segments/FlowSegmentBuilder';
+
+const LoadingFallback = () => (
+  <Box
+    display="flex"
+    justifyContent="center"
+    alignItems="center"
+    minHeight="100vh"
+  >
+    <CircularProgress />
+  </Box>
+);
 
 const App = () => {
   const dispatch = useDispatch();
@@ -33,50 +47,82 @@ const App = () => {
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        <CircularProgress />
-      </Box>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingFallback />}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Router>
+              <Routes>
+                {/* Public Routes */}
+                <Route 
+                  path="/login" 
+                  element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} 
+                />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                
+                {/* Protected Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<Layout />}>
+                  
+                    <Route index element={<Dashboard />} />
+                    <Route path="/segments" element={<Segments />} />
+                    <Route path="/segments/create" element={<CreateSegment />} />
+                    <Route path="/rule-builder" element={<RuleBuilder />} />
+                    <Route path="/campaigns" element={<Campaigns />} />
+                    <Route path="/campaign-history" element={<CampaignHistory />} />
+                    <Route path="/analytics" element={<Analytics />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/profile" element={<Profile />} />
+                  </Route>
+                </Route>
+
+                {/* Fallback route */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Router>
+          </ThemeProvider>
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route 
-            path="/login" 
-            element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} 
-          />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<Layout />}>
-            
-              <Route index element={<Dashboard />} />
-              <Route path="/segments" element={<Segments />} />
-              <Route path="/segments/create" element={<CreateSegment />} />
-              <Route path="/rule-builder" element={<RuleBuilder />} />
-              <Route path="/campaigns" element={<Campaigns />} />
-              <Route path="/campaign-history" element={<CampaignHistory />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/profile" element={<Profile />} />
-            </Route>
-          </Route>
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingFallback />}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route 
+                path="/login" 
+                element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} 
+              />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              
+              {/* Protected Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route element={<Layout />}>
+                
+                  <Route index element={<Dashboard />} />
+                  <Route path="/segments" element={<Segments />} />
+                  <Route path="/segments/create" element={<CreateSegment />} />
+                  <Route path="/rule-builder" element={<RuleBuilder />} />
+                  <Route path="/campaigns" element={<Campaigns />} />
+                  <Route path="/campaign-history" element={<CampaignHistory />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/profile" element={<Profile />} />
+                </Route>
+              </Route>
 
-          {/* Fallback route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-    </ThemeProvider>
+              {/* Fallback route */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Router>
+        </ThemeProvider>
+      </Suspense>
+    </ErrorBoundary>
   );
 };
 

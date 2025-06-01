@@ -27,7 +27,7 @@ import {
   CheckCircle as SuccessIcon,
 } from '@mui/icons-material';
 import { selectUser } from '../store/slices/authSlice';
-import axios from 'axios';
+import api from '../services/api';
 import {
   BarChart,
   Bar,
@@ -65,7 +65,7 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await axios.get(`http://localhost:4000/api/dashboard/stats?email=${user.email}`);
+      const response = await api.get(`/api/dashboard/stats?email=${user.email}`);
       if (response.data.status === 'success') {
         setDashboardData(response.data.data);
       }
