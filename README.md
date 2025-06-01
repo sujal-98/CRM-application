@@ -2,6 +2,11 @@
 
 A modern React-based CRM system with customer segmentation and campaign management capabilities.
 
+![readme1](https://github.com/user-attachments/assets/4e60c6e1-83a9-48dd-a0d7-24f80bd5c1ca)
+![readm2](https://github.com/user-attachments/assets/01e2fcbf-47d7-453c-9c8e-0a7516a32582)
+![readm3](https://github.com/user-attachments/assets/86666d42-7606-4583-b0f1-16b6ba897182)
+![readm4](https://github.com/user-attachments/assets/ee3f859d-ade2-4a4d-b67d-026cbb8d0e2f)
+
 ## Features
 
 - **Dashboard**
