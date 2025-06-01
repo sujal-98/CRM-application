@@ -1,52 +1,54 @@
 # XenoCRM Frontend
 
-A modern CRM platform built with React and Material-UI, featuring customer segmentation, campaign management, and AI-powered insights.
+A modern React-based CRM system with customer segmentation and campaign management capabilities.
 
 ## Features
 
-- 🔐 Google OAuth Authentication
-- 📊 Modern Dashboard with Analytics
-- 👥 Customer Segmentation
-- 📨 Campaign Management
-- 📈 Campaign Performance Tracking
-- 🤖 AI-Powered Insights
-- 📱 Responsive Design
+- **Dashboard**
+  - Real-time statistics for customers and campaigns
+  - Performance metrics for last 10 campaigns
+  - Recent segments and campaign overview
+  - Visual analytics and charts
+
+- **Customer Management**
+  - Customer profile viewing and management
+  - Customer activity tracking
+  - Order history and spending analysis
+
+- **Segmentation**
+  - Dynamic segment builder with drag-and-drop interface
+  - Multiple condition support (Total Spend, Days Since Last Order, etc.)
+  - Real-time segment preview
+  - Save and manage segments
+
+- **Campaign Management**
+  - Campaign history view
+  - Campaign performance metrics
+  - Success/Failure rate tracking
+  - Message delivery statistics
 
 ## Tech Stack
 
-- React 18
+- React.js
 - Material-UI (MUI)
 - React Router
-- Recharts for Data Visualization
-- Google OAuth
-- Axios for API Communication
-
-## Prerequisites
-
-- Node.js 16.x or later
-- npm 7.x or later
-- Google Cloud Platform account (for OAuth)
+- Axios for API calls
+- Chart.js for analytics
 
 ## Setup
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd crm
-   ```
-
-2. Install dependencies:
+1. Install dependencies:
    ```bash
    npm install
    ```
 
-3. Create a `.env` file in the root directory:
+2. Create a `.env` file in the root directory with:
    ```
    REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id_here
    REACT_APP_API_URL=http://localhost:3001/api
    ```
 
-4. Get your Google OAuth Client ID:
+3. Get your Google OAuth Client ID:
    - Go to the [Google Cloud Console](https://console.cloud.google.com)
    - Create a new project or select an existing one
    - Enable the Google+ API
@@ -55,7 +57,7 @@ A modern CRM platform built with React and Material-UI, featuring customer segme
    - Add authorized JavaScript origins (e.g., http://localhost:3000)
    - Copy the client ID to your `.env` file
 
-5. Start the development server:
+4. Start the development server:
    ```bash
    npm start
    ```
