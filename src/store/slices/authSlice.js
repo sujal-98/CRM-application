@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://crm-backend-y93k.onrender.com';
+const FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL || 'https://crm-application-ictu.onrender.com';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -23,8 +24,8 @@ export const loginWithGoogle = createAsyncThunk(
   'auth/loginWithGoogle',
   async (_, { rejectWithValue }) => {
     try {
-      // Redirect to Google OAuth
-      window.location.href = `${API_URL}/api/auth/google`;
+      // Redirect to Google OAuth with correct redirect URL
+      window.location.href = `${API_URL}/api/auth/google?redirect_uri=${encodeURIComponent(FRONTEND_URL + '/auth/callback')}`;
       return new Promise(() => {}); // This promise will never resolve due to redirect
     } catch (error) {
       return rejectWithValue(error.message || 'Login failed');
