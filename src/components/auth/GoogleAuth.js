@@ -11,7 +11,7 @@ const GoogleAuth = () => {
   const handleSuccess = async (credentialResponse) => {
     try {
       // Redirect to backend Google OAuth flow with proper redirect URI
-      const redirectUri = encodeURIComponent(`${config.frontendUrl}/auth/callback`);
+      const redirectUri = `${config.frontendUrl}/auth/callback`;
       window.location.href = `${config.apiUrl}/api/auth/google?redirect_uri=${redirectUri}`;
     } catch (error) {
       console.error('Authentication error:', error);
