@@ -31,6 +31,9 @@ const AuthCallback = () => {
           });
           return;
         }
+
+        // Log the current cookies for debugging
+        console.log('Current cookies:', document.cookie);
         
         // Initial delay to ensure session is set
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
