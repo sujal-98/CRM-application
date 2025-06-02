@@ -327,7 +327,7 @@ const FlowSegmentBuilder = () => {
         }
       };
 
-      const response = await axios.post('http://localhost:4000/api/segments/save', payload);
+      const response = await axios.post('https://crm-backend-y93k.onrender.com/api/segments/save', payload);
 
       if (response.data.status === 'success') {
         enqueueSnackbar('Segment saved successfully!', { 

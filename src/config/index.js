@@ -1,5 +1,5 @@
 const config = {
-  apiUrl: process.env.REACT_APP_API_URL || 'https://crm-application-ictu.onrender.com',
+  apiUrl: process.env.REACT_APP_API_URL || 'https://crm-backend-y93k.onrender.com',
   frontendUrl: process.env.REACT_APP_FRONTEND_URL || 'https://crm-application-ictu.onrender.com',
   isProduction: process.env.NODE_ENV === 'production',
   googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID,

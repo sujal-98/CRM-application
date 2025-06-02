@@ -8,13 +8,20 @@ services:
       - key: NODE_ENV
         value: production
       - key: REACT_APP_API_URL
-        sync: false
+        value: https://crm-backend-y93k.onrender.com
+      - key: REACT_APP_FRONTEND_URL
+        value: https://crm-application-ictu.onrender.com
+      - key: REACT_APP_COOKIE_DOMAIN
+        value: .onrender.com
       - key: REACT_APP_GOOGLE_CLIENT_ID
         sync: false
     headers:
       - path: /*
         name: Cache-Control
         value: no-cache
+      - path: /*
+        name: Access-Control-Allow-Credentials
+        value: "true"
     routes:
       - type: rewrite
         source: /*

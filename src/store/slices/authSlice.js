@@ -7,9 +7,13 @@ const FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL || 'https://crm-applicat
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // Important for sessions
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
+  },
+  // Add these settings to prevent caching
+  params: {
+    _t: Date.now()
   }
 });
 
@@ -23,7 +27,6 @@ api.interceptors.request.use((config) => {
   
   // Add credentials and CORS headers
   config.withCredentials = true;
-  config.headers['Access-Control-Allow-Credentials'] = true;
   
   return config;
 }, (error) => {
@@ -33,17 +36,13 @@ api.interceptors.request.use((config) => {
 // Add response interceptor for handling auth errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      // Clear any existing cookies
-      document.cookie.split(";").forEach((c) => {
-        document.cookie = c
-          .replace(/^ +/, "")
-          .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/;domain=.onrender.com`);
-      });
-      
-      // Redirect to login
-      window.location.href = '/login';
+      // Don't redirect if we're already on login or handling callback
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login' && !currentPath.includes('/auth/callback')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -70,46 +69,41 @@ export const handleAuthCallback = createAsyncThunk(
       console.log('Making /me request...');
       
       // Get user data from /me endpoint with retry logic
-      const maxRetries = 3;
+      const maxRetries = 5;
+      const retryDelay = 1000; // 1 second
       let lastError;
       
       for (let i = 0; i < maxRetries; i++) {
         try {
+          // Add a small delay before each retry
+          if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+          }
+
+          console.log(`Attempt ${i + 1} to fetch user data...`);
+          
           const response = await api.get('/api/auth/me', {
-            withCredentials: true
+            withCredentials: true,
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
           });
 
           console.log('Response from /me:', response.data);
 
-          // Check if user data is valid
           if (!response.data || !response.data.email) {
             console.error('Invalid user data received:', response.data);
             throw new Error('Invalid user data received');
           }
 
-          // Read user data from cookie if available
-          const userCookie = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('user='));
-          
-          let userData = response.data;
-          if (userCookie) {
-            try {
-              const cookieData = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
-              userData = { ...userData, ...cookieData };
-            } catch (cookieError) {
-              console.error('Error parsing user cookie:', cookieError);
-            }
-          }
-
-          return userData;
+          return response.data;
         } catch (error) {
           console.error(`Auth callback attempt ${i + 1} failed:`, error);
           lastError = error;
           
-          if (error.response?.status === 401 && i < maxRetries - 1) {
-            console.log('Session not ready, waiting before retry...');
-            await new Promise(resolve => setTimeout(resolve, 1000));
+          if (i < maxRetries - 1) {
+            console.log(`Waiting ${retryDelay}ms before retry...`);
             continue;
           }
           throw error;

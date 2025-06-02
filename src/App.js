@@ -41,7 +41,7 @@ const App = () => {
     // Check authentication status when app loads
     dispatch(initializeAuth());
     // Configure axios defaults
-    axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+    axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'https://crm-backend-y93k.onrender.com';
     axios.defaults.withCredentials = true;
     axios.defaults.headers.common['Content-Type'] = 'application/json';
   }, [dispatch]);

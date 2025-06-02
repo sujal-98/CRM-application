@@ -53,7 +53,7 @@ const Segments = () => {
     const fetchSegments = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:4000/api/segments/${email}`);
+        const response = await axios.get(`https://crm-backend-y93k.onrender.com/api/segments/${email}`);
         console.log('Segments Response:', response.data);
         
         if (response.data.status === 'success' && response.data.data && response.data.data.segments) {
@@ -112,7 +112,7 @@ const Segments = () => {
     setCampaignLoading(true);
     try {
       // Create and automatically start the campaign
-      const response = await axios.post('http://localhost:4000/api/campaigns', {
+      const response = await axios.post('https://crm-backend-y93k.onrender.com/api/campaigns', {
         segmentId: selectedSegment._id,
         messageTemplate: campaignMessage,
         email: user.email,
