@@ -38,6 +38,7 @@ const App = () => {
   const { isAuthenticated, loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
+    // Check authentication status when app loads
     dispatch(initializeAuth());
     // Configure axios defaults
     axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
@@ -46,44 +47,7 @@ const App = () => {
   }, [dispatch]);
 
   if (loading) {
-    return (
-      <ErrorBoundary>
-        <Suspense fallback={<LoadingFallback />}>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Router>
-              <Routes>
-                {/* Public Routes */}
-                <Route 
-                  path="/login" 
-                  element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} 
-                />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                
-                {/* Protected Routes */}
-                <Route element={<ProtectedRoute />}>
-                  <Route element={<Layout />}>
-                  
-                    <Route index element={<Dashboard />} />
-                    <Route path="/segments" element={<Segments />} />
-                    <Route path="/segments/create" element={<CreateSegment />} />
-                    <Route path="/rule-builder" element={<RuleBuilder />} />
-                    <Route path="/campaigns" element={<Campaigns />} />
-                    <Route path="/campaign-history" element={<CampaignHistory />} />
-                    <Route path="/analytics" element={<Analytics />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/profile" element={<Profile />} />
-                  </Route>
-                </Route>
-
-                {/* Fallback route */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Router>
-          </ThemeProvider>
-        </Suspense>
-      </ErrorBoundary>
-    );
+    return <LoadingFallback />;
   }
 
   return (
@@ -96,15 +60,19 @@ const App = () => {
               {/* Public Routes */}
               <Route 
                 path="/login" 
-                element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} 
+                element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" replace />} 
               />
-              <Route path="/auth/callback" element={<AuthCallback />} />
+              
+              {/* Root route - redirect based on auth status */}
+              <Route 
+                path="/" 
+                element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} 
+              />
               
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
-                
-                  <Route index element={<Dashboard />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/segments" element={<Segments />} />
                   <Route path="/segments/create" element={<CreateSegment />} />
                   <Route path="/rule-builder" element={<RuleBuilder />} />

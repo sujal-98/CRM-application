@@ -12,12 +12,31 @@ const api = axios.create({
 
 // Add request interceptor to include token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  // Add timestamp to prevent caching
+  config.params = {
+    ...config.params,
+    _t: Date.now()
+  };
+  
+  // Add credentials
+  config.withCredentials = true;
+  
   return config;
 });
+
+// Add response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      console.log('Auth error detected, clearing state...');
+      // Clear local state on auth errors
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Async thunks
 export const loginWithGoogle = createAsyncThunk(
@@ -37,22 +56,58 @@ export const handleAuthCallback = createAsyncThunk(
   'auth/handleCallback',
   async (_, { rejectWithValue }) => {
     try {
-      // Get user data from /me endpoint
-      const response = await api.get('/api/auth/me', {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json'
+      console.log('Making /me request...');
+      
+      // Get user data from /me endpoint with retry logic
+      const maxRetries = 3;
+      let lastError;
+      
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          const response = await api.get('/api/auth/me', {
+            withCredentials: true
+          });
+
+          console.log('Response from /me:', response.data);
+
+          // Check if user data is valid
+          if (!response.data || !response.data.email) {
+            console.error('Invalid user data received:', response.data);
+            throw new Error('Invalid user data received');
+          }
+
+          // Read user data from cookie if available
+          const userCookie = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('user='));
+          
+          let userData = response.data;
+          if (userCookie) {
+            try {
+              const cookieData = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
+              userData = { ...userData, ...cookieData };
+            } catch (cookieError) {
+              console.error('Error parsing user cookie:', cookieError);
+            }
+          }
+
+          return userData;
+        } catch (error) {
+          console.error(`Auth callback attempt ${i + 1} failed:`, error);
+          lastError = error;
+          
+          if (error.response?.status === 401 && i < maxRetries - 1) {
+            console.log('Session not ready, waiting before retry...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+          throw error;
         }
-      });
-
-      if (!response.data) {
-        throw new Error('No user data received');
       }
-
-      // Store user data in Redux state
-      return response.data;
+      
+      throw lastError;
     } catch (error) {
-      console.error('Auth callback error:', error);
+      console.error('Auth callback error in thunk:', error);
       return rejectWithValue(
         error.response?.data?.message || 
         error.message || 
@@ -130,6 +185,7 @@ export const logout = createAsyncThunk(
 export const initializeAuth = createAsyncThunk(
   'auth/initialize',
   async (_, { dispatch }) => {
+    console.log('Initializing auth state...');
     await dispatch(checkAuth());
   }
 );
@@ -150,11 +206,13 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.user = action.payload;
       state.loading = false;
+      state.error = null;
     },
     clearAuth: (state) => {
       state.isAuthenticated = false;
       state.user = null;
       state.loading = false;
+      state.error = null;
     },
     clearError: (state) => {
       state.error = null;
@@ -196,16 +254,19 @@ const authSlice = createSlice({
       })
       // Handle Callback
       .addCase(handleAuthCallback.pending, (state) => {
+        console.log('Auth callback pending...');
         state.loading = true;
         state.error = null;
       })
       .addCase(handleAuthCallback.fulfilled, (state, action) => {
+        console.log('Auth callback fulfilled:', action.payload);
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload;
         state.error = null;
       })
       .addCase(handleAuthCallback.rejected, (state, action) => {
+        console.error('Auth callback rejected:', action.payload);
         state.loading = false;
         state.isAuthenticated = false;
         state.user = null;
