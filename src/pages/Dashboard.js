@@ -69,12 +69,8 @@ const Dashboard = () => {
       setError(null);
       console.log('Fetching dashboard data for user:', user?.email);
       
-      const response = await api.get('/api/dashboard/stats', {
-        params: { email: user?.email },
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+      const response = await api.get('dashboard/stats', {
+        params: { email: user?.email }
       });
 
       console.log('Dashboard response:', response.data);
@@ -90,7 +86,7 @@ const Dashboard = () => {
       
       // If unauthorized, redirect to login
       if (error.response?.status === 401) {
-        navigate('/#/login');
+        navigate('/login');
       }
     } finally {
       setLoading(false);

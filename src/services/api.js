@@ -2,12 +2,13 @@ import axios from 'axios';
 import config from '../config';
 
 const api = axios.create({
-  baseURL: config.apiUrl,
+  baseURL: config.apiUrl || 'https://crm-backend-y93k.onrender.com',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache',
-    'Pragma': 'no-cache'
+    'Pragma': 'no-cache',
+    'X-Client-Version': process.env.REACT_APP_VERSION || '1.0.0'
   }
 });
 
@@ -22,12 +23,23 @@ api.interceptors.request.use((config) => {
   // Add CORS headers
   config.withCredentials = true;
 
+  // Ensure we're using the correct API URL by removing any 'undefined' segments
+  if (config.url) {
+    // Remove any 'undefined' segments from the URL
+    config.url = config.url.replace(/\/undefined\//g, '/').replace(/\/+/g, '/');
+    
+    // Ensure the URL starts with /api/
+    if (!config.url.startsWith('/api/') && !config.url.startsWith('http')) {
+      config.url = `/api/${config.url.replace(/^\/+/, '')}`;
+    }
+  }
+
   return config;
 }, (error) => {
   return Promise.reject(error);
 });
 
-// Add interceptors for error handling
+// Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -54,15 +66,12 @@ api.interceptors.response.use(
   }
 );
 
-// Add request interceptor for production API
+// Production-specific configuration
 if (config.isProduction) {
   api.interceptors.request.use((config) => {
-    // Add production-specific headers
-    config.headers['X-Client-Version'] = process.env.REACT_APP_VERSION || '1.0.0';
-    
     // Ensure we're using the correct API URL
     if (!config.url.startsWith('http')) {
-      config.url = `${config.apiUrl}${config.url}`;
+      config.url = config.url.replace(/\/+/g, '/'); // Remove duplicate slashes
     }
     
     return config;
