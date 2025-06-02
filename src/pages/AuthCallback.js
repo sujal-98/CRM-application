@@ -10,27 +10,37 @@ const AuthCallback = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const MAX_RETRIES = 5;
+    const RETRY_DELAY = 1000;
+    let retryCount = 0;
+
     const handleCallback = async () => {
       try {
-        console.log('Starting auth callback handling...');
+        console.log('Starting auth callback handling... Attempt:', retryCount + 1);
         
-        // Add a small delay to ensure the session is properly set
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Initial delay to ensure session is set
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         
-        // Get user data from /me endpoint
         const result = await dispatch(handleAuthCallback()).unwrap();
         console.log('Auth callback result:', result);
         
         if (result && result.email) {
           console.log('Authentication successful, redirecting to dashboard...');
-          // Successful authentication
           navigate(config.auth.dashboardPath, { replace: true });
         } else {
           console.error('No user data in result:', result);
-          // Authentication failed
+          
+          // If we haven't exceeded max retries, try again
+          if (retryCount < MAX_RETRIES) {
+            retryCount++;
+            console.log(`Retrying... Attempt ${retryCount + 1} of ${MAX_RETRIES}`);
+            setTimeout(handleCallback, RETRY_DELAY);
+            return;
+          }
+          
           navigate(config.auth.loginPath, { 
             replace: true,
-            state: { error: 'Authentication failed. No user data received.' }
+            state: { error: 'Authentication failed. Please try again.' }
           });
         }
       } catch (error) {
@@ -41,10 +51,11 @@ const AuthCallback = () => {
           message: error.message
         });
         
-        // If we get a 401, the session might not be ready yet, try again
-        if (error.response?.status === 401) {
-          console.log('Session not ready, retrying...');
-          setTimeout(() => handleCallback(), 1000);
+        // If we get a 401 and haven't exceeded max retries, try again
+        if ((error.response?.status === 401 || error.response?.status === 403) && retryCount < MAX_RETRIES) {
+          retryCount++;
+          console.log(`Session not ready, retrying... Attempt ${retryCount + 1} of ${MAX_RETRIES}`);
+          setTimeout(handleCallback, RETRY_DELAY);
           return;
         }
         
