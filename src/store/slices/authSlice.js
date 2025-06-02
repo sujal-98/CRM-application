@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+const API_URL = process.env.REACT_APP_API_URL || 'https://crm-backend-y93k.onrender.com';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -23,10 +23,8 @@ export const loginWithGoogle = createAsyncThunk(
   'auth/loginWithGoogle',
   async (_, { rejectWithValue }) => {
     try {
-      // Use frontend callback URL instead of backend directly
-      const callbackUrl = `${window.location.origin}/auth/callback`;
-      const encodedCallback = encodeURIComponent(callbackUrl);
-      window.location.href = `${API_URL}/api/auth/google?callback=${encodedCallback}`;
+      // Redirect to Google OAuth
+      window.location.href = `${API_URL}/api/auth/google`;
       return new Promise(() => {}); // This promise will never resolve due to redirect
     } catch (error) {
       return rejectWithValue(error.message || 'Login failed');
@@ -36,13 +34,29 @@ export const loginWithGoogle = createAsyncThunk(
 
 export const handleAuthCallback = createAsyncThunk(
   'auth/handleCallback',
-  async (_, { dispatch }) => {
+  async (_, { rejectWithValue }) => {
     try {
       // Get user data from /me endpoint
-      const response = await api.get('/api/auth/me');
+      const response = await api.get('/api/auth/me', {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.data) {
+        throw new Error('No user data received');
+      }
+
+      // Store user data in Redux state
       return response.data;
     } catch (error) {
-      throw error;
+      console.error('Auth callback error:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to authenticate'
+      );
     }
   }
 );
@@ -62,86 +76,45 @@ export const checkAuth = createAsyncThunk(
 export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
-    // Immediately redirect to login before doing anything else
-    window.location.href = '/login';
-    
     try {
-      // Call logout endpoint with credentials and cache control
+      // Call the logout endpoint with credentials
       await api.post('/api/auth/logout', {}, {
         withCredentials: true,
         headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
+          'Content-Type': 'application/json'
         }
       });
-
-      // Clear ALL browser storage
+      
+      // Clear all local storage
       localStorage.clear();
+      
+      // Clear all session storage
       sessionStorage.clear();
       
-      // Clear ALL cookies with proper domain and expiration
-      const domain = window.location.hostname;
-      const cookiesToClear = [
-        'xeno.sid',
-        'connect.sid',
-        'session',
-        'auth',
-        'token',
-        'google_oauth_state',
-        'google_oauth_code',
-        'google_oauth_token',
-        'google_oauth_refresh_token'
-      ];
-
-      // Clear all cookies in the document
-      document.cookie.split(";").forEach(cookie => {
-        const [name] = cookie.trim().split("=");
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${domain}`;
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=www.${domain}`;
-      });
-
-      // Also clear our known cookies explicitly
-      cookiesToClear.forEach(name => {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${domain}`;
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=www.${domain}`;
-      });
-
-      // Clear axios and any cached data
+      // Clear axios defaults
       delete api.defaults.headers.common['Authorization'];
-      api.interceptors.request.handlers = [];
-      api.interceptors.response.handlers = [];
-
-      // Force clear any Google OAuth state
-      if (window.gapi) {
-        try {
-          window.gapi.auth2.getAuthInstance().signOut();
-          window.gapi.auth2.getAuthInstance().disconnect();
-        } catch (e) {
-          console.error('Error clearing Google auth:', e);
-        }
-      }
-
+      
+      // Clear cookies with proper domain and path
+      const domain = window.location.hostname;
+      document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/;domain=${domain}`);
+      });
+      
+      // Force reload to clear any remaining state
+      window.location.href = '/login';
+      
       return true;
     } catch (error) {
       console.error('Logout error:', error);
-      
-      // Even if the server call fails, clear everything
+      // Even if the server call fails, we should still clear local state
       localStorage.clear();
       sessionStorage.clear();
       delete api.defaults.headers.common['Authorization'];
       
-      // Clear all cookies
-      const domain = window.location.hostname;
-      document.cookie.split(";").forEach(cookie => {
-        const [name] = cookie.trim().split("=");
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${domain}`;
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=www.${domain}`;
-      });
+      // Force reload to clear any remaining state
+      window.location.href = '/login';
       
       return rejectWithValue(
         error.response?.data?.message || 

@@ -255,7 +255,7 @@ const FlowSegmentBuilder = () => {
             totalSpend: 0
           });
           setAudience([]);
-        } else {
+      } else {
           // Store the unique customer objects and total count
           setAudience(uniqueCustomers);
           setAudienceCount(totalCount);
@@ -349,9 +349,9 @@ const FlowSegmentBuilder = () => {
     } catch (error) {
       console.error('Save error:', error);
       enqueueSnackbar(error.response?.data?.message || 'Failed to save segment', { 
-        variant: 'error',
-        autoHideDuration: 5000
-      });
+          variant: 'error',
+          autoHideDuration: 5000
+        });
     } finally {
       setLoading(false);
     }

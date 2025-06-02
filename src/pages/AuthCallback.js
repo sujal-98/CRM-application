@@ -11,11 +11,29 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        await dispatch(handleAuthCallback()).unwrap();
-        navigate('/dashboard');
+        // Get user data from /me endpoint
+        const result = await dispatch(handleAuthCallback()).unwrap();
+        
+        if (result) {
+          // Successful authentication
+          navigate('/dashboard', { replace: true });
+        } else {
+          // Authentication failed
+          navigate('/login', { 
+            replace: true,
+            state: { error: 'Authentication failed. Please try again.' }
+          });
+        }
       } catch (error) {
         console.error('Auth callback error:', error);
-        navigate('/login', { state: { error: 'Authentication failed' } });
+        navigate('/login', { 
+          replace: true,
+          state: { 
+            error: error.response?.data?.message || 
+                  error.message || 
+                  'Authentication failed. Please try again.' 
+          }
+        });
       }
     };
 
