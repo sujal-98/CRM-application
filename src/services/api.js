@@ -5,11 +5,9 @@ const api = axios.create({
   baseURL: config.apiUrl,
   withCredentials: true,
   headers: {
-    'Content-Type': 'application/json'
-  },
-  // Add timestamp to prevent caching
-  params: {
-    _t: Date.now()
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache'
   }
 });
 
@@ -23,8 +21,6 @@ api.interceptors.request.use((config) => {
 
   // Add CORS headers
   config.withCredentials = true;
-  config.headers['Cache-Control'] = 'no-cache';
-  config.headers['Pragma'] = 'no-cache';
 
   return config;
 }, (error) => {
