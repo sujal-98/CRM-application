@@ -61,17 +61,37 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [user.email]);
+  }, [user?.email]);
 
   const fetchDashboardData = async () => {
     try {
-      const response = await api.get(`/api/dashboard/stats?email=${user.email}`);
+      setLoading(true);
+      setError(null);
+      console.log('Fetching dashboard data for user:', user?.email);
+      
+      const response = await api.get('/api/dashboard/stats', {
+        params: { email: user?.email },
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+
+      console.log('Dashboard response:', response.data);
+
       if (response.data.status === 'success') {
         setDashboardData(response.data.data);
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch dashboard data');
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      setError(error.message);
+      setError(error.response?.data?.message || error.message || 'Failed to fetch dashboard data');
+      
+      // If unauthorized, redirect to login
+      if (error.response?.status === 401) {
+        navigate('/#/login');
+      }
     } finally {
       setLoading(false);
     }
