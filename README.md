@@ -2,6 +2,11 @@
 
 A modern React-based CRM application with customer segmentation, campaign management, and analytics capabilities.
 
+![readme1](https://github.com/user-attachments/assets/7d0b2e65-7680-4764-8615-d61025f3ea63)
+![readm2](https://github.com/user-attachments/assets/833b249e-dfeb-42b8-8b97-880b2660c59c)
+![readm3](https://github.com/user-attachments/assets/d3104ad7-8587-482a-9e37-571dd2a33059)
+![readm4](https://github.com/user-attachments/assets/b4d0ac86-2452-49fd-9558-d7713bd98c2e)
+
 ## Features
 
 ### Customer Segmentation
