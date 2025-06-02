@@ -5,9 +5,9 @@ const config = {
   googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID,
   cookieDomain: process.env.REACT_APP_COOKIE_DOMAIN || '.onrender.com',
   auth: {
-    callbackPath: '/auth/callback',
-    loginPath: '/login',
-    dashboardPath: '/dashboard'
+    callbackPath: '/#/auth/callback',
+    loginPath: '/#/login',
+    dashboardPath: '/#/dashboard'
   }
 };
 

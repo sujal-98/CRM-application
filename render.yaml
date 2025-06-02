@@ -24,5 +24,8 @@ services:
         value: "true"
     routes:
       - type: rewrite
+        source: /
+        destination: /index.html
+      - type: rewrite
         source: /*
         destination: /index.html

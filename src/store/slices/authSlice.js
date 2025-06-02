@@ -39,9 +39,9 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       // Don't redirect if we're already on login or handling callback
-      const currentPath = window.location.pathname;
+      const currentPath = window.location.hash.substring(1);
       if (currentPath !== '/login' && !currentPath.includes('/auth/callback')) {
-        window.location.href = '/login';
+        window.location.href = '/#/login';
       }
     }
     return Promise.reject(error);
@@ -54,7 +54,7 @@ export const loginWithGoogle = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       // Redirect to Google OAuth with correct redirect URL
-      window.location.href = `${API_URL}/api/auth/google?redirect_uri=${encodeURIComponent(FRONTEND_URL + '/auth/callback')}`;
+      window.location.href = `${API_URL}/api/auth/google?redirect_uri=${encodeURIComponent(FRONTEND_URL + '/#/auth/callback')}`;
       return new Promise(() => {}); // This promise will never resolve due to redirect
     } catch (error) {
       return rejectWithValue(error.message || 'Login failed');
