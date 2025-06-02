@@ -7,7 +7,10 @@ const FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL || 'https://crm-applicat
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true // Important for sessions
+  withCredentials: true, // Important for sessions
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
 // Add request interceptor to include token
@@ -18,21 +21,29 @@ api.interceptors.request.use((config) => {
     _t: Date.now()
   };
   
-  // Add credentials
+  // Add credentials and CORS headers
   config.withCredentials = true;
+  config.headers['Access-Control-Allow-Credentials'] = true;
   
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
-// Add response interceptor to handle auth errors
+// Add response interceptor for handling auth errors
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  (error) => {
     if (error.response?.status === 401) {
-      console.log('Auth error detected, clearing state...');
-      // Clear local state on auth errors
-      localStorage.clear();
-      sessionStorage.clear();
+      // Clear any existing cookies
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/;domain=.onrender.com`);
+      });
+      
+      // Redirect to login
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
