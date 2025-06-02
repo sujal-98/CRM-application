@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { handleAuthCallback } from '../store/slices/authSlice';
 import { Box, CircularProgress, Typography } from '@mui/material';
@@ -7,6 +7,7 @@ import config from '../config';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -17,6 +18,19 @@ const AuthCallback = () => {
     const handleCallback = async () => {
       try {
         console.log('Starting auth callback handling... Attempt:', retryCount + 1);
+        
+        // Check if we have any error state from the OAuth callback
+        const searchParams = new URLSearchParams(location.search);
+        const error = searchParams.get('error');
+        
+        if (error) {
+          console.error('OAuth error:', error);
+          navigate(config.auth.loginPath, { 
+            replace: true,
+            state: { error: 'Authentication failed: ' + error }
+          });
+          return;
+        }
         
         // Initial delay to ensure session is set
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
@@ -71,7 +85,7 @@ const AuthCallback = () => {
     };
 
     handleCallback();
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate, location]);
 
   return (
     <Box

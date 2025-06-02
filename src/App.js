@@ -63,6 +63,12 @@ const App = () => {
                 element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" replace />} 
               />
               
+              {/* Auth callback route */}
+              <Route 
+                path="/auth/callback"
+                element={<AuthCallback />}
+              />
+              
               {/* Root route - redirect based on auth status */}
               <Route 
                 path="/" 
